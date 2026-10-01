@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+# Assemble windows-host/ — a folder you can copy to S:/docker/finance on Windows.
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+DEST="$ROOT/windows-host"
+
+rm -rf "$DEST"
+mkdir -p "$DEST/data" "$DEST/src"
+
+cp "$ROOT/package.json" "$ROOT/package-lock.json" "$DEST/"
+cp "$ROOT/vite.phone.config.ts" "$ROOT/vite.server.config.ts" "$DEST/"
+cp "$ROOT/Dockerfile" "$ROOT/docker-compose.yml" "$ROOT/.dockerignore" "$DEST/"
+
+rsync -a --delete \
+  --exclude '*.js' --exclude '*.d.ts' --exclude '*.js.map' \
+  "$ROOT/src/main/" "$DEST/src/main/"
+rsync -a --delete \
+  --exclude '*.js' --exclude '*.d.ts' --exclude '*.js.map' \
+  "$ROOT/src/shared/" "$DEST/src/shared/"
+rsync -a --delete "$ROOT/src/renderer/" "$DEST/src/renderer/"
+rsync -a --delete "$ROOT/src/phone-public/" "$DEST/src/phone-public/"
+
+mkdir -p "$DEST/scripts"
+cp "$ROOT/scripts/show-tokens.cjs" "$DEST/scripts/show-tokens.cjs"
+
+# Headless Docker does not need Electron entry / IPC / smoke.
+rm -f "$DEST/src/main/index.ts" "$DEST/src/main/ipc.ts" "$DEST/src/main/smoke.ts"
+
+cat > "$DEST/data/README.txt" <<'EOF'
+Put your database files in this folder (copy, do not move from Mac):
+
+  finance.sqlite
+  finance.sqlite-wal   (if it exists)
+  finance.sqlite-shm   (if it exists)
+
+Path on Windows after install:
+  S:\docker\finance\data\finance.sqlite
+
+See INSTALL.txt in the parent folder.
+EOF
+
+cat > "$DEST/INSTALL.txt" <<'EOF'
+Finance — Windows Docker host
+=============================
+
+Copy THIS entire folder to:
+
+  S:\docker\finance
+
+So you have:
+
+  S:\docker\finance\INSTALL.txt          (this file)
+  S:\docker\finance\docker-compose.yml
+  S:\docker\finance\Dockerfile
+  S:\docker\finance\package.json
+  S:\docker\finance\src\...
+  S:\docker\finance\data\                (database goes here)
+
+
+Prerequisites
+-------------
+1. Docker Desktop for Windows installed and running
+2. Tailscale installed and signed in on this Windows PC
+3. In Docker Desktop: Settings → Resources → File sharing → allow the S: drive
+
+
+Preserve your Mac data (no data loss)
+-------------------------------------
+On the Mac, BEFORE switching:
+
+1. Quit Finance completely (Dock → Quit). Confirm it is not running.
+2. Backup:
+     ~/Library/Application Support/Finance
+   Copy that whole folder to the Desktop, e.g. Finance-backup-YYYYMMDD
+3. Copy (do NOT move or delete) these files into
+   S:\docker\finance\data\  on Windows:
+     finance.sqlite
+     finance.sqlite-wal   (if present)
+     finance.sqlite-shm   (if present)
+4. Confirm file sizes match the Mac originals.
+
+
+Start the server
+----------------
+Open PowerShell or Command Prompt:
+
+  cd /d S:\docker\finance
+  docker compose up -d --build
+
+First build can take several minutes.
+
+
+Open the app
+------------
+From Mac or phone on Tailscale:
+
+  http://<windows-magicdns>:18765/
+
+Example:
+
+  http://your-pc.tailxxxxx.ts.net:18765/
+
+If Safari/phone says "Bad pairing token":
+  The code saved on the phone is not the one in this database.
+  On Windows, in S:\docker\finance run:
+
+    docker compose exec finance node scripts/show-tokens.cjs
+
+  Copy the "host" token. In Safari tap change / re-pair and paste that
+  exact token (no spaces). Roommate phones each use their own member token.
+
+  If show-tokens fails or the books look empty, the Mac database was not
+  copied into data\ — stop the container, copy finance.sqlite (+ wal/shm)
+  again, then: docker compose up -d
+
+1. Check balances, expenses, people, settings match Mac.
+2. Only then: re-pair phones to the Windows hostname (and correct tokens).
+3. Do NOT reopen Mac Finance as the host (dual-write risk).
+4. Keep the Mac backup forever (or until you are sure).
+
+
+Useful commands
+---------------
+  cd /d S:\docker\finance
+  docker compose logs -f          # watch logs
+  docker compose restart          # restart
+  docker compose down             # stop (data in .\data stays)
+  docker compose up -d --build    # rebuild after updating this folder
+
+
+Optional: set pairing host name
+-------------------------------
+Edit docker-compose.yml and uncomment / set:
+
+  FINANCE_PHONE_HOST: your-pc.tailxxxxx.ts.net
+
+Then:
+
+  docker compose up -d
+
+
+If something looks wrong
+------------------------
+  docker compose down
+
+Keep using Mac from the backup / Application Support copy.
+The container never deletes finance.sqlite; an empty data folder
+only creates a new empty database.
+EOF
+
+echo "Prepared: $DEST"
+echo "Copy that folder to S:\\docker\\finance on Windows."

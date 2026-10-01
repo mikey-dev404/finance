@@ -1,0 +1,99 @@
+@import '@fontsource-variable/outfit';
+@import '@fontsource-variable/fraunces';
+@import 'tailwindcss';
+
+@theme inline {
+  --font-sans: 'Outfit Variable', 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Fraunces Variable', 'Fraunces', ui-serif, Georgia, serif;
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-income: var(--income);
+  --color-expense: var(--expense);
+  --color-warn: var(--warn);
+}
+
+:root {
+  --paper: #f3eee6;
+  --surface: #fbf8f2;
+  --ink: #1c1814;
+  --muted: #7a7268;
+  --line: #e4dcd0;
+  --accent: #3f5c4a;
+  --accent-soft: #dce8e0;
+  --income: #2f6b4f;
+  --expense: #9a3b24;
+  --warn: #a15c12;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #12100e;
+    --surface: #1c1916;
+    --ink: #f3ece3;
+    --muted: #a3988c;
+    --line: #2e2924;
+    --accent: #8fbc9a;
+    --accent-soft: #24332a;
+    --income: #7dcaa3;
+    --expense: #e07a5f;
+    --warn: #e0a45c;
+    color-scheme: dark;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+html.phone body {
+  padding-top: env(safe-area-inset-top);
+}
+
+html.phone button,
+html.phone input,
+html.phone select,
+html.phone textarea {
+  min-height: 2.75rem;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

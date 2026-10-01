@@ -1,0 +1,52 @@
+{
+  "name": "finance",
+  "version": "1.0.0",
+  "description": "Private local finance app for Mac",
+  "main": "./out/main/index.js",
+  "private": true,
+  "scripts": {
+    "dev": "env -u ELECTRON_RUN_AS_NODE electron-vite dev",
+    "smoke": "npm run phone:build && env -u ELECTRON_RUN_AS_NODE FINANCE_SMOKE=1 FINANCE_PHONE_PORT=18766 electron-vite preview",
+    "build": "electron-vite build",
+    "preview": "env -u ELECTRON_RUN_AS_NODE electron-vite preview",
+    "package": "electron-vite build && npm run phone:build && env -u ELECTRON_RUN_AS_NODE CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac",
+    "server:build": "vite build --config vite.server.config.ts",
+    "server": "npm run server:build && FINANCE_DATA_DIR=\"${FINANCE_DATA_DIR:-./data}\" FINANCE_WEB_DIR=\"${FINANCE_WEB_DIR:-./mobile/www}\" env ELECTRON_RUN_AS_NODE=1 electron out/server/headless.js",
+    "prepare:windows": "bash scripts/prepare-windows-host.sh",
+    "phone:build": "vite build --config vite.phone.config.ts",
+    "phone:sync": "npm run phone:build && npx cap sync",
+    "phone:open": "npx cap open android",
+    "phone:apk": "npm run phone:sync && bash scripts/phone-apk.sh",
+    "phone:ios": "npm run phone:sync && bash scripts/phone-ios.sh",
+    "phone:ipa": "npm run phone:sync && bash scripts/phone-ipa.sh",
+    "phone:open:ios": "npx cap open ios",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "@fontsource-variable/fraunces": "^5.2.8",
+    "@fontsource-variable/outfit": "^5.2.8",
+    "better-sqlite3": "^12.4.1",
+    "lucide-react": "^0.544.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "recharts": "^2.15.4"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/ios": "^7.6.9",
+    "@tailwindcss/vite": "^4.1.13",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.3",
+    "electron": "^38.1.2",
+    "electron-builder": "^26.0.12",
+    "electron-vite": "^4.0.1",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5.9.2",
+    "vite": "^7.3.6"
+  }
+}

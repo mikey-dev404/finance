@@ -1,0 +1,24 @@
+appId: com.personal.finance
+productName: Finance
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - out/**/*
+  - package.json
+asarUnpack:
+  - '**/*.node'
+  - '**/better-sqlite3/**'
+extraResources:
+  - from: mobile/www
+    to: phone
+mac:
+  icon: icon.icns
+  category: public.app-category.finance
+  target:
+    - dmg
+    - dir
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false
+npmRebuild: true

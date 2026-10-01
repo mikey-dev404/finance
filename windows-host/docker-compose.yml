@@ -1,0 +1,18 @@
+# Run from S:/docker/finance on the Windows Tailscale box.
+# Ensure Docker Desktop can access the S: drive (Settings → Resources → File sharing).
+
+services:
+  finance:
+    build: .
+    container_name: finance
+    restart: unless-stopped
+    ports:
+      - "18765:18765"
+    environment:
+      FINANCE_DATA_DIR: /data
+      FINANCE_WEB_DIR: /app/phone
+      FINANCE_PHONE_PORT: "18765"
+      # Optional: set to your Windows MagicDNS name, e.g. windows.tailxxxxx.ts.net
+      # FINANCE_PHONE_HOST: windows.tailxxxxx.ts.net
+    volumes:
+      - ./data:/data
